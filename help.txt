@@ -1,0 +1,13 @@
+!!/help - Prints this help page
+!!/numposts - Prints the number of posts that Smelly has stored right now
+!!/allposts - Prints all titles + links of all posts Smelly has stored. Each one goes in a seperate message, so use sparringly
+!!/see <number> - Prints the nth post Smelly has stored. Also accepts negatives, passes as a ruby array index
+!!/alive - Checks if smelly is alive
+!!/quota - Prints how much of their quota Smelly has left
+!!/stappit - Kills Smelly (sometimes must be done twice)
+!!/test <words> - Checks <words> agains blacklists from SmokeDetector
+!!/sites - Lists an approximate number of posts scanned per site and api calls per site with the format <site: <posts> (<api calls>)
+!!/rate - The rate of api queries/minute
+!!/uptime - Prints the ammount of time smelly has been running for
+!!/load_thresh - Reloads the batching numbers from a file on the server
+!!/thresholds - Lists the current threshold settings
