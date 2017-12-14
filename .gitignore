@@ -2,3 +2,4 @@
 *.save
 domain_bayes*
 classifier*
+!classifier.rb
