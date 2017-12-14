@@ -10,7 +10,7 @@ require "./spamchecks"
 $start = DateTime.now
 
 cb = ChatBot.new("smelly@stackexchange.developingtechnician.com", "smelly#1")
-cli = SE::API::Client.new('r7x*BAaM9QwSKcl8b7D3FA((', filter: '!LUcFBHnAma1aXlBRcQnh.U')
+cli = SE::API::Client.new('r7x*BAaM9QwSKcl8b7D3FA((')
 
 cb.login
 
@@ -33,7 +33,13 @@ SE::Realtime.json do |e|
     if post_ids.length >= thresholds[site] && !$sleeping
       post_ids = post_ids.join(';')
       ids[site] = []
-      cli.posts(post_ids, site: site).each do |post|
+      cli.questions(post_ids, site: site).each do |post|
+        puts "==========================================="
+        post.answers.push(post).each do |p|
+          puts "#{p.class} #{p.last_activity_date} #{p.title}"
+        end
+        puts "==========================================="
+        post = post.answers.push(post).sort_by { |p| p.last_activity_date }.first
         posts[site] << post
         reports_for(post).each do |report|
           puts report

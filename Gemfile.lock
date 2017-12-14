@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/izwick-schachter/se-api
-  revision: 288c643479729cd2d97430012e82562d8555794a
+  revision: 78d3dc3df2563ab014cf7647663e27e3aa79ee54
   branch: master
   specs:
     se-api (0.0.0.beta0)
@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://gitlab.com/izwick-schachter/ChatX
-  revision: de4fc46a52e11fd69e85cdc6b744d6e6bc114ea0
+  revision: 3f413d4e7f24263acd9af9b2d5ec72e913312893
   branch: master
   specs:
     chatx (0.0.0.pre.pre2)
