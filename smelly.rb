@@ -69,143 +69,64 @@ cb.gen_hooks do
     on "mention" do |e|
       reply_to e.message, "You called?"
     end
-    on "message" do |e|
-      say "Yep, alive and well" if e.message.content.downcase == "!!/alive"
-    end
-    on "message" do |e|
-      say "#{cli.quota} requests remaining" if e.message.content.downcase == "!!/quota"
-    end
-    on "message" do |e|
-      say all_posts[e.message.content.split(" ").last.to_i].json["body_markdown"] if e.message.content.downcase.start_with?("!!/see")
-    end
-    on "message" do |e|
-      if e.message.content.downcase.start_with? "!!/allposts"
-        posts[e.message.content.downcase.split(" ")[1]].each { |post| say "[#{post.title}](#{post.link})" }
-      end
-    end
-    on "message" do |e|
-      say all_posts.length if e.message.content.downcase == "!!/numposts"
-    end
-    on "message" do |e|
-      say File.read("help.txt") if e.message.content.downcase == "!!/help"
-    end
-    on "message" do |e|
-      exit if e.message.content.downcase == "!!/stappit"
-    end
-    on "message" do |e|
-      if e.message.content.downcase.start_with? "!!/test"
-        text = HTMLEntities.new.decode(e.message.content.split(" ")[1..-1].join(" "))
+    command "!!/alive" { say "Yep, alive and well" }
+    command "!!/quota" { say "#{cli.quota} requests remaining" }
+    command "!!/numposts" { say posts.values.flatten.length }
+    command "!!/help" { say File.read('help.txt') }
+    command "!!/stappit" { say "Stapping it"; exit }
+    on "message" do |msg|
+      if msg.content.downcase.start_with? "!!/test"
+        text = HTMLEntities.new.decode(msg.content.split(" ")[1..-1].join(" "))
         reports = reports_for(SE::API::Post.new({"body_markdown" => text, "body" => text, "title" => text}))
         if reports.empty?
           puts "Would not be caught"
-          reply_to e.message, "Would not be caught"
+          reply_to msg, "Would not be caught"
         else
           reports.each do |report|
             puts report
-            reply_to(e.message, report)
+            reply_to(msg, report)
           end
         end
       end
     end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/sites"
-        say posts.sort_by {|k,v| v.length.to_f / thresholds[k] }.reverse.map { |k,v| "#{k}: #{v.length} (#{v.length.to_f/thresholds[k]})" }.join("\n")
-      end
+    command "!!/sites" do
+      say posts.sort_by {|k,v| v.length.to_f / thresholds[k] }.reverse.map { |k,v| "#{k}: #{v.length} (#{v.length.to_f/thresholds[k]})" }.join("\n")
     end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/rate"
-        say cli.quota_used.to_f/((DateTime.now-$start)*24*60)
-      end
+    command "!!/rate" { say cli.quota_used.to_f/((DateTime.now-$start)*24*60) }
+    command "!!/load_thresh" { say "Reloading..."; thresholds = load_thresholds }
+    command "!!/uptime" { say "Up #{((DateTime.now-$start)*24).to_i} hours #{((DateTime.now-$start)*24*60).to_i%60} minutes #{((DateTime.now-$start)*24*60*60).to_i%60} seconds" }
+    command "!!/thresholds" { say YAML.dump(thresholds) }
+    command "!!/threshold" { |site| say "The threshold for #{site} is #{thresholds[site]}" }
+    command "!!/set_thresh" { |site, new_thresh| thresholds[site] = new_thresh.to_i; say "Setting #{site} to #{thresholds[site]}. Don't forget to !!/dump_thresh (or !!/load_thresh)" }
+    command "!!/dump_thresh" do
+      old = File.read('thresholds.yml')
+      File.open('thresholds.yml', 'w') { |f| YAML.dump(thresholds.to_a.select { |site,th| th.to_i > 1 }.to_h, f) }
+      say "Old:\n#{old}\nNew:\n#{File.read('thresholds.yml')}"
     end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/load_thresh"
-        say "Reloading..."
-        thresholds = load_thresholds
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/uptime"
-        say "Up #{((DateTime.now-$start)*24).to_i} hours #{((DateTime.now-$start)*24*60).to_i%60} minutes #{((DateTime.now-$start)*24*60*60).to_i%60} seconds"
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/thresholds"
-        say YAML.dump(thresholds)
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase.start_with? "!!/threshold "
-        msg = e.message.content.downcase.split(" ")[1]
-        say "The threshold for #{msg} is #{thresholds[msg]}"
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase.start_with? "!!/set_thresh"
-        msg = e.message.content.downcase.split(" ")[1..-1]
-        thresholds[msg[0]] = msg[1].to_i
-        say "Setting #{msg[0]} to #{msg[1].to_i}. Don't forget to !!/dump_thresh (or !!/load_thresh)"
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/dump_thresh"
-        old = File.read('thresholds.yml')
-        File.open('thresholds.yml', 'w') { |f| YAML.dump(thresholds.to_a.select { |site,th| th.to_i > 1 }.to_h, f) }
-        say "OLD: #{old}\nNew: #{File.read('thresholds.yml')}"
-      end
-    end
-    on "message" do |e|
-      case e.message.content.downcase
-      when "!!/sleep"
-        $sleeping = true
-      when "!!/wake"
-        $sleeping = false
-      when "!!/sleeping?"
-        say $sleeping
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/threads"
-        say Thread.list.map(&:backtrace).join("\n")
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/ws_test"
-        cb.websockets["stackexchange"].driver.close
-      end
-    end
-    on "message" do |e|
-      if e.message.content.downcase == "!!/reload_checks"
-        load "spamchecks.rb"
-        say "Checks reloaded!"
-      end
-    end
-    on "message" do |e|
-      case e.message.content.downcase
-      when "!!/classify load"
+    command "!!/sleep" { $sleeping = true }
+    command "!!/wake" { $sleeping = false }
+    command "!!/sleeping" { say $sleeping }
+    command "!!/ws_test" { cb.websockets["stackexchange"].driver.close }
+    command "!!/reload_checks" { load "spamchecks.rb"; say "Checks reloaded!" }
+    command "!!/classify" do |cmd, _as, val|
+      case cmd.downcase
+      when "load"
         $classifier = Marshal.load(File.read('classifier'))
         say "Loading classifier from file"
-      when "!!/classify dump"
+      when "dump"
         File.open('classifier', 'w') {|f| f.print(Marshal.dump($classifier)) }
         say "Dumping classifier to file"
       else
-        if e.message.content.downcase.start_with? "!!/classify"
-          msg = HTMLEntities.new.decode(e.message.content.split(" ")[1..-1].join(" "))
-          puts HTMLEntities.new.decode(msg)
-          str = %r{\"(.*)\"}.match(msg)[1]
-          type = %r{\".*\"\sas\s(\w*)}.match(msg)[1]
-          say "Training the classifier to classify '#{str}' as #{type}"
-          $classifier.train type, str
-        end
+        puts val
+        str = cmd
+        type = val
+        say "Training the classifier to classify '#{str}' as #{type}"
+        $classifier.train type, str
       end
     end
-    on "message" do |e|
-      if e.message.content.downcase.start_with? "!!/classifier_thresh"
-        $classifier_thresh = e.message.content.split(" ")[1].to_f
-        say "Setting classifier threshold to #{$classifier_thresh}"
-      end
-    end
-    on "message" do |e|
-      #say $mid_p.to_s if e.message.content == "!!/mid_p"
+    command "!!/classifier_thresh" do |e|
+      $classifier_thresh = e.message.content.split(" ")[1].to_f
+      say "Setting classifier threshold to #{$classifier_thresh}"
     end
   end
 end
