@@ -4,7 +4,7 @@ require "se/api"
 require "pry"
 require "htmlentities"
 require "./monkey_patches"
-require "./classifier"
+require "./classifier.rb"
 require "./spamchecks"
 
 $start = DateTime.now
@@ -27,7 +27,20 @@ thresholds = load_thresholds
 ids = Hash.new {|hsh, key| hsh[key] = []}
 posts = Hash.new {|hsh, key| hsh[key] = []}
 
+$mid_p = {}
+
+$ignored_sites = %w[
+ru.stackoverflow
+es.stackoverflow
+japanese
+rus
+german
+pt.stackoverflow
+spanish
+]
+
 SE::Realtime.json do |e|
+  next if $ignored_sites.include? e[:site]
   ids[e[:site]] << e[:id]
   ids.each do |site, post_ids|
     if post_ids.length >= thresholds[site] && !$sleeping
@@ -43,7 +56,8 @@ SE::Realtime.json do |e|
         posts[site] << post
         reports_for(post).each do |report|
           puts report
-          cb.say(report, 63561)
+          mid = cb.say(report, 63561)
+          $mid_p[mid] = post 
         end
       end
     end
@@ -81,7 +95,7 @@ cb.gen_hooks do
     on "message" do |e|
       if e.message.content.downcase.start_with? "!!/test"
         text = HTMLEntities.new.decode(e.message.content.split(" ")[1..-1].join(" "))
-        reports = reports_for(SE::API::Post.new({"body_markdown" => text}))
+        reports = reports_for(SE::API::Post.new({"body_markdown" => text, "body" => text, "title" => text}))
         if reports.empty?
           puts "Would not be caught"
           reply_to e.message, "Would not be caught"
@@ -183,6 +197,15 @@ cb.gen_hooks do
           $classifier.train type, str
         end
       end
+    end
+    on "message" do |e|
+      if e.message.content.downcase.start_with? "!!/classifier_thresh"
+        $classifier_thresh = e.message.content.split(" ")[1].to_f
+        say "Setting classifier threshold to #{$classifier_thresh}"
+      end
+    end
+    on "message" do |e|
+      #say $mid_p.to_s if e.message.content == "!!/mid_p"
     end
   end
 end

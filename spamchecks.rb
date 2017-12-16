@@ -16,6 +16,8 @@ $blacklist = (blacklists.map {|i| i.split("\n")}.flatten - ["", nil]).map do |re
   end
 end.reject(&:nil?)
 
+$classifier_thresh = -600
+
 def matches_bl?(text, bl = $blacklist)
   bl.map do |r|
     begin
@@ -70,6 +72,19 @@ def matches_classifier(s)
   $classifier.classify(s) == 'spam'
 end
 
+def clean(s)
+  # Remove empty lines and code blocks
+  s = s.to_s.split("\n").reject do |line|
+    line.split("").reject {|char| char.empty?}.empty? ||
+    line.start_with?("    ")
+  end.join("\n")
+  # Replace []() links with text in []. Replace \1 with \2 for links.
+  s.gsub!(%r{\[(.*)\]\(([^\b]*)\)},'\1')
+  # Remove inline code
+  s.gsub!(%r{(\`\b.*\b\`)}, '')
+  return s.to_s
+end
+
 def reports_for(post)
   rval = []
   #if post.json["body_markdown"].to_s.downcase.include? "thanks"
@@ -84,11 +99,15 @@ def reports_for(post)
   if chars = has_few_characters(post.json["body_markdown"])
     rval << "Has few unique characters #{chars}: [#{post.title}](#{post.link})"
   end
-  if $classifier.classify(post.json["body"]) == 'Spam'
-    rval << "Matches body classifier: [#{post.title}](#{post.link})"
+  std_classified = $classifier.classify_with_score(clean(post.json["body"].to_s))
+  if std_classified[0] == 'Spam' && std_classified[1] > $classifier_thresh
+    rval << "Matches body classifier (score: #{std_classified[1]}): [#{post.title}](#{post.link})"
   end
   if URI.extract(post.body).map { |u| URI.parse(u).hostname rescue nil }.compact.any? { |i| $domain_classifier.classify(i) == 'Spam' }
     rval << "Matches domain classifier: [#{post.title}](#{post.link})"
+  end
+  if post.title.to_s.gsub(" ", "").end_with? ","
+    rval << "Title ends with comma: [#{post.title}](#{post.link})"
   end
   rval
 end

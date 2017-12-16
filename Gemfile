@@ -4,5 +4,5 @@ gem "chatx", git: "https://gitlab.com/izwick-schachter/ChatX", branch: "master"#
 gem "se-realtime", git: "https://github.com/izwick-schachter/se-realtime", branch: "master"
 gem "se-api", git: "https://github.com/izwick-schachter/se-api", branch: "master"
 gem "pry"
-gem "classifier-reborn"
+gem "classifier-reborn", "2.1.0"
 gem "htmlentities"

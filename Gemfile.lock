@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/izwick-schachter/se-api
-  revision: 78d3dc3df2563ab014cf7647663e27e3aa79ee54
+  revision: f3c68c246b58484c2b753f72f727526fb5f4417f
   branch: master
   specs:
     se-api (0.0.0.beta0)
@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://gitlab.com/izwick-schachter/ChatX
-  revision: 3f413d4e7f24263acd9af9b2d5ec72e913312893
+  revision: aa3e5a4b74cc5d4e12db90f9f52c019454a24833
   branch: master
   specs:
     chatx (0.0.0.pre.pre2)
@@ -75,7 +75,7 @@ PLATFORMS
 
 DEPENDENCIES
   chatx!
-  classifier-reborn
+  classifier-reborn (= 2.1.0)
   htmlentities
   pry
   se-api!
