@@ -16,7 +16,7 @@ $blacklist = (blacklists.map {|i| i.split("\n")}.flatten - ["", nil]).map do |re
   end
 end.reject(&:nil?)
 
-$classifier_thresh = -600
+$classifier_thresh = -320
 
 def matches_bl?(text, bl = $blacklist)
   bl.map do |r|

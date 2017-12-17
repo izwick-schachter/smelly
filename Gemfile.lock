@@ -7,10 +7,10 @@ GIT
 
 GIT
   remote: https://github.com/izwick-schachter/se-realtime
-  revision: d01ecfe9ab307fc0d59acbb5601f703e020fbdfc
+  revision: 05b7081ce24d2408f35d6a065346f23dac7843c0
   branch: master
   specs:
-    se-realtime (0.0.0.beta0)
+    se-realtime (0.0.0.beta1)
       mechanize (~> 2.7)
       nokogiri (~> 1.8)
       permessage_deflate (~> 0.1)
@@ -18,10 +18,11 @@ GIT
 
 GIT
   remote: https://gitlab.com/izwick-schachter/ChatX
-  revision: aa3e5a4b74cc5d4e12db90f9f52c019454a24833
+  revision: 9fa1356696b55a814ecfa7267c3ea2f39c4741ee
   branch: master
   specs:
     chatx (0.0.0.pre.pre2)
+      htmlentities (~> 4.3)
       mechanize (~> 2.7)
       nokogiri (~> 1.8)
       permessage_deflate (~> 0.1)

@@ -44,16 +44,16 @@ SE::Realtime.json do |e|
   ids[e[:site]] << e[:id]
   ids.each do |site, post_ids|
     if post_ids.length >= thresholds[site] && !$sleeping
-      post_ids = post_ids.join(';')
       ids[site] = []
       cli.questions(post_ids, site: site).each do |post|
+        q_and_a = post.answers.push(post)
         puts "==========================================="
-        post.answers.push(post).each do |p|
+        q_and_a.each do |p|
           puts "#{p.class} #{p.last_activity_date} #{p.title}"
         end
         puts "==========================================="
-        post = post.answers.push(post).sort_by { |p| p.last_activity_date }.first
-        posts[site] << post
+        post = q_and_a.sort_by { |p| p.last_activity_date }.first
+        posts[site] << q_and_a
         reports_for(post).each do |report|
           puts report
           mid = cb.say(report, 63561)
@@ -67,13 +67,13 @@ end
 cb.gen_hooks do
   room 63561 do
     on "mention" do |e|
-      reply_to e.message, "You called?"
+      reply_to e, "You called?"
     end
-    command "!!/alive" { say "Yep, alive and well" }
-    command "!!/quota" { say "#{cli.quota} requests remaining" }
-    command "!!/numposts" { say posts.values.flatten.length }
-    command "!!/help" { say File.read('help.txt') }
-    command "!!/stappit" { say "Stapping it"; exit }
+    command("!!/alive")    { say "Yep, alive and well" }
+    command("!!/quota")    { say "#{cli.quota} requests remaining" }
+    command("!!/numposts") { say posts.values.flatten.length }
+    command("!!/help")     { say File.read('help.txt') }
+    command("!!/stappit")  { say "Stapping it"; exit }
     on "message" do |msg|
       if msg.content.downcase.start_with? "!!/test"
         text = HTMLEntities.new.decode(msg.content.split(" ")[1..-1].join(" "))
@@ -92,22 +92,22 @@ cb.gen_hooks do
     command "!!/sites" do
       say posts.sort_by {|k,v| v.length.to_f / thresholds[k] }.reverse.map { |k,v| "#{k}: #{v.length} (#{v.length.to_f/thresholds[k]})" }.join("\n")
     end
-    command "!!/rate" { say cli.quota_used.to_f/((DateTime.now-$start)*24*60) }
-    command "!!/load_thresh" { say "Reloading..."; thresholds = load_thresholds }
-    command "!!/uptime" { say "Up #{((DateTime.now-$start)*24).to_i} hours #{((DateTime.now-$start)*24*60).to_i%60} minutes #{((DateTime.now-$start)*24*60*60).to_i%60} seconds" }
-    command "!!/thresholds" { say YAML.dump(thresholds) }
-    command "!!/threshold" { |site| say "The threshold for #{site} is #{thresholds[site]}" }
-    command "!!/set_thresh" { |site, new_thresh| thresholds[site] = new_thresh.to_i; say "Setting #{site} to #{thresholds[site]}. Don't forget to !!/dump_thresh (or !!/load_thresh)" }
+    command("!!/rate")        { say cli.quota_used.to_f/((DateTime.now-$start)*24*60) }
+    command("!!/load_thresh") { say "Reloading..."; thresholds = load_thresholds }
+    command("!!/uptime")      { say "Up #{((DateTime.now-$start)*24).to_i} hours #{((DateTime.now-$start)*24*60).to_i%60} minutes #{((DateTime.now-$start)*24*60*60).to_i%60} seconds" }
+    command("!!/thresholds")  { say YAML.dump(thresholds) }
+    command("!!/threshold")   { |site| say "The threshold for #{site} is #{thresholds[site]}" }
+    command("!!/set_thresh")  { |site, new_thresh| thresholds[site] = new_thresh.to_i; say "Setting #{site} to #{thresholds[site]}. Don't forget to !!/dump_thresh (or !!/load_thresh)" }
     command "!!/dump_thresh" do
       old = File.read('thresholds.yml')
       File.open('thresholds.yml', 'w') { |f| YAML.dump(thresholds.to_a.select { |site,th| th.to_i > 1 }.to_h, f) }
       say "Old:\n#{old}\nNew:\n#{File.read('thresholds.yml')}"
     end
-    command "!!/sleep" { $sleeping = true }
-    command "!!/wake" { $sleeping = false }
-    command "!!/sleeping" { say $sleeping }
-    command "!!/ws_test" { cb.websockets["stackexchange"].driver.close }
-    command "!!/reload_checks" { load "spamchecks.rb"; say "Checks reloaded!" }
+    command("!!/sleep")         { $sleeping = true }
+    command("!!/wake")          { $sleeping = false }
+    command("!!/sleeping")      { say $sleeping }
+    command("!!/ws_test")       { cb.websockets["stackexchange"].driver.close }
+    command("!!/reload_checks") { load "spamchecks.rb"; say "Checks reloaded!" }
     command "!!/classify" do |cmd, _as, val|
       case cmd.downcase
       when "load"
@@ -124,8 +124,8 @@ cb.gen_hooks do
         $classifier.train type, str
       end
     end
-    command "!!/classifier_thresh" do |e|
-      $classifier_thresh = e.message.content.split(" ")[1].to_f
+    command "!!/classifier_thresh" do |thresh|
+      $classifier_thresh = thresh.to_f
       say "Setting classifier threshold to #{$classifier_thresh}"
     end
   end
