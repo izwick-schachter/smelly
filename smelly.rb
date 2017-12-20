@@ -9,7 +9,7 @@ require "./spamchecks"
 
 $start = DateTime.now
 
-cb = ChatBot.new("smelly@stackexchange.developingtechnician.com", "smelly#1")
+cb = ChatBot.new(ENV['ChatXUsername'], ENV['ChatXPassword'])
 cli = SE::API::Client.new('r7x*BAaM9QwSKcl8b7D3FA((')
 
 cb.login
@@ -64,8 +64,11 @@ SE::Realtime.json do |e|
   end
 end
 
+$admins = [162795]
+
 cb.gen_hooks do
   room 63561 do
+    say "Starting up..."
     on "mention" do |e|
       reply_to e, "You called?"
     end
@@ -73,7 +76,25 @@ cb.gen_hooks do
     command("!!/quota")    { say "#{cli.quota} requests remaining" }
     command("!!/numposts") { say posts.values.flatten.length }
     command("!!/help")     { say File.read('help.txt') }
-    command("!!/stappit")  { say "Stapping it"; exit }
+    on "message" do |e|
+      if e.content.downcase.start_with? "!!/powah?"
+        if $admins.include? e.user_id.to_i
+          reply_to e, "You have powah!"
+        else
+          reply_to e, "You don't have powah!"
+        end
+      end
+    end
+    on "message" do |e|
+      if e.content.downcase.start_with? "!!/stappit"
+        if $admins.include? e.user.id.to_i
+          say "Stapping it"
+          exit
+        else
+          reply_to e, "You can't stop me!"
+        end
+      end
+    end
     on "message" do |msg|
       if msg.content.downcase.start_with? "!!/test"
         text = HTMLEntities.new.decode(msg.content.split(" ")[1..-1].join(" "))
@@ -103,8 +124,8 @@ cb.gen_hooks do
       File.open('thresholds.yml', 'w') { |f| YAML.dump(thresholds.to_a.select { |site,th| th.to_i > 1 }.to_h, f) }
       say "Old:\n#{old}\nNew:\n#{File.read('thresholds.yml')}"
     end
-    command("!!/sleep")         { $sleeping = true }
-    command("!!/wake")          { $sleeping = false }
+    command("!!/sleep")         { $sleeping = true; say "Am asleep? #{$sleeping}" }
+    command("!!/wake")          { $sleeping = false;say "Am asleep? #{$sleeping}" }
     command("!!/sleeping")      { say $sleeping }
     command("!!/ws_test")       { cb.websockets["stackexchange"].driver.close }
     command("!!/reload_checks") { load "spamchecks.rb"; say "Checks reloaded!" }
@@ -127,6 +148,9 @@ cb.gen_hooks do
     command "!!/classifier_thresh" do |thresh|
       $classifier_thresh = thresh.to_f
       say "Setting classifier threshold to #{$classifier_thresh}"
+    end
+    command "!!/ping" do |user, *msg|
+      say "@#{user} #{msg.join(" ")}"
     end
   end
 end

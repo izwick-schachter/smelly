@@ -58,6 +58,21 @@ def has_few_characters(s)
   end
 end
 
+def clean_links(s)
+  s.to_s.gsub(/(http[^\"\s]*)/, "")
+end
+
+#def has_repeating_characters(s)
+#    s = clean_links(s)
+#    if s.length == 0 || 
+#    if s is None or len(s) == 0 or len(s) >= 300 or regex.compile("<pre>|<code>").search(s):
+#        return False, ""
+#    matches = regex.compile(u"([^\\s_\u200b\u200c.,?!=~*/0-9-])(\\1{10,})", regex.UNICODE).findall(s)
+#    match = "".join(["".join(match) for match in matches])
+#    if (100 * len(match) / len(s)) >= 20:  # Repeating characters make up >= 20 percent
+#        return True, u"Repeated character: *{}*".format(match)
+#return False, ""
+
 class String
   def remove_substrs!(arr)
     arr.each { |rem| gsub!(rem, "") }

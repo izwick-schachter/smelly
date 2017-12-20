@@ -1,13 +1,24 @@
 !!/help - Prints this help page
-!!/numposts - Prints the number of posts that Smelly has stored right now
-!!/allposts - Prints all titles + links of all posts Smelly has stored. Each one goes in a seperate message, so use sparringly
-!!/see <number> - Prints the nth post Smelly has stored. Also accepts negatives, passes as a ruby array index
-!!/alive - Checks if smelly is alive
+!!/alive - Smelly will tell you if it is alive
 !!/quota - Prints how much of their quota Smelly has left
-!!/stappit - Kills Smelly (sometimes must be done twice)
-!!/test <words> - Checks <words> agains blacklists from SmokeDetector
+!!/stappit - Kills Smelly (sometimes must be done twice) and requires !!/powah?
+!!/test <words> - Checks <words> against blacklists from SmokeDetector and against other spam checks
 !!/sites - Lists an approximate number of posts scanned per site and api calls per site with the format <site: <posts> (<api calls>)
 !!/rate - The rate of api queries/minute
 !!/uptime - Prints the ammount of time smelly has been running for
 !!/load_thresh - Reloads the batching numbers from a file on the server
+!!/dump_thresh - Dumps the thresholds to a file
 !!/thresholds - Lists the current threshold settings
+!!/threshold <site> - Prints the threshold settings for a site
+!!/set_thresh <site> <number> - Sets the threshold for a site. That's the batching on the API request.
+!!/numposts - Prints the number of posts scanned
+!!/sleep - Makes all API requests stop and thus stops automated reporting
+!!/wake - Turns of sleep mode
+!!/sleeping? - Tells you if Smelly is sleeping
+!!/reload_checks - Reloads the spamchecks
+!!/classify load - Loads the body classifier from a file
+!!/classify dump - Dumps the body classifier to a file
+!!/classify "words" as <good/spam> - Trains the classifier
+!!/classifier_thresh - Sets the threshold for when the body classifier will send a notification in chat.
+!!/powah? - Will tell you if you have powah
+!!/ping <user> <msg> - Pings <user> with message <msg>

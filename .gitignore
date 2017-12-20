@@ -3,3 +3,4 @@
 domain_bayes*
 classifier*
 !classifier.rb
+init.sh

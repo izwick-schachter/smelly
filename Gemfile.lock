@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://gitlab.com/izwick-schachter/ChatX
-  revision: 9fa1356696b55a814ecfa7267c3ea2f39c4741ee
+  revision: aaef6c1ddc72f45e1741cce29c06fefbc77873d0
   branch: master
   specs:
     chatx (0.0.0.pre.pre2)
@@ -63,6 +63,7 @@ GEM
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
+    rugged (0.26.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.4)
@@ -79,6 +80,7 @@ DEPENDENCIES
   classifier-reborn (= 2.1.0)
   htmlentities
   pry
+  rugged
   se-api!
   se-realtime!
 
